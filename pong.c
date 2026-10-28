@@ -187,6 +187,11 @@ void show_map(){
 
 //Helpers and cleanup
 
+//Generates a random number between the given min and max (inclusive)
+int rand_between(int min, int max){
+	return rand() % (max - min + 1) + min;
+}
+
 //Generates a random movement direction for the ball at the start of a round.
 int rand_dir(){
 	int vel = 1;
@@ -195,11 +200,6 @@ int rand_dir(){
 		vel *= -1;
 	}
 	return vel;
-}
-
-//Generates a random number between the given min and max (inclusive)
-int rand_between(int min, int max){
-	return rand() % (max - min + 1) + min;
 }
 
 //Clears the menu options so the field is clear during a match
