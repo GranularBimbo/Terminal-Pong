@@ -12,17 +12,29 @@
 #define START_Y 6
 #define START_X 20
 
+//Position variables
 int player_x = 40, player_y = START_Y;
 int cpu_x = 2, cpu_y = START_Y;
 int ball_x = 4, ball_y = START_Y;
 
+//Scoring variables
 int player_score = 0, cpu_score = 0;
 
+//AI movement and difficulty variables
 int vel_x = 0, vel_y = 0, x_interval = 2, y_interval = 5;
-int cpu_follow_chance = 90;
+int cpu_follow_chance = 90; //Percentage based, higher follow chance % = more CPU accuracy.
+
+//90 seems deceptively high, but it's good for a couple back and forths. It's checked every time the ball changes height
+//so a lower chance than even 90 means a fairly inaccurate CPU.
 
 bool running = true;
 
+
+//Formatting and input
+struct termios original_termios;
+
+//Uses escape codes to show or hide the terminal cursor. Otherwise you see it flashing across the screen each frame
+//which just hurts your eyes.
 void hide_cursor(){
 	printf("\033[?25l");
 }
@@ -32,15 +44,13 @@ void show_cursor(){
 }
 
 
-struct termios original_termios;
-
-// Restore terminal settings on exit
+//Restore terminal settings on exit
 void restore_terminal() {
     tcsetattr(STDIN_FILENO, TCSANOW, &original_termios);
     show_cursor();
 }
 
-// Set terminal to raw mode
+//Allows terminal to collect raw input directly without needing to press enter to input controls
 void enable_raw_mode() {
     tcgetattr(STDIN_FILENO, &original_termios);
     atexit(restore_terminal); // Ensure restoration on exit
@@ -51,11 +61,6 @@ void enable_raw_mode() {
     raw.c_cc[VTIME] = 0; // No timeout
 
     tcsetattr(STDIN_FILENO, TCSANOW, &raw);
-}
-
-
-int rand_between(int min, int max){
-	return rand() % (max - min + 1) + min;
 }
 
 
@@ -84,6 +89,7 @@ void show_map(){
 	printf("Press ↑ to move up\n");
 	printf("Press ↓ to move down\n\n");
 
+	//Menu display between rounds
 	if(vel_x == 0 || vel_y == 0){
 		if(cpu_score == 5){
 			field[START_Y][17] = 'Y';
@@ -158,6 +164,7 @@ void show_map(){
 		}
 	}	
 
+	//Main gameplay interface
 	printf("   CPU SCORE: %d     |    PLAYER SCORE: %d\n", cpu_score, player_score);
 
 	for(int r = 0; r < ROWS; r++){
@@ -174,9 +181,13 @@ void show_map(){
 		}
 	}
 
-	printf("\033[H");
+	printf("\033[H"); //Escape code to return the cursor back to top left of the screen. Avoids the flickering that comes with using system("clear")
 }
 
+
+//Helpers and cleanup
+
+//Generates a random movement direction for the ball at the start of a round.
 int rand_dir(){
 	int vel = 1;
 	int flip_vel = rand_between(0, 1);
@@ -186,7 +197,12 @@ int rand_dir(){
 	return vel;
 }
 
+//Generates a random number between the given min and max (inclusive)
+int rand_between(int min, int max){
+	return rand() % (max - min + 1) + min;
+}
 
+//Clears the menu options so the field is clear during a match
 void reset_message(){
 	field[START_Y][16] = ' ';
 	field[START_Y][17] = ' ';
@@ -220,6 +236,9 @@ void reset_message(){
 }
 
 
+//Game loop and Logic
+
+//Resets the paddles and ball and sends it moving in a random direction
 void new_game(){
 	system("clear");
 
@@ -244,63 +263,68 @@ void new_game(){
 
 
 int main(int argc, char *argv){
-	srand(time(NULL));
+	//Formatting and setup
+	srand(time(NULL)); //Sets the random seed based on the current CPU time
 	enable_raw_mode();
 	system("clear");
 	hide_cursor();
 
+	//Logic and controls
 	int frame_count = 0;
 	while(running){
 		struct timespec ts = {0, 18 * 1000000}; //18ms
-		nanosleep(&ts, NULL);
+		nanosleep(&ts, NULL); //Sleep for 18ms to make the speed more manageable
 
 		frame_count++;
 
-		char c;
+		char c; //This contains the key press data
 		
+		//Reads key press data into c
 		read(STDIN_FILENO, &c, 1);
-		if(c == 0x41 && player_y > 1){
+		if(c == 0x41 && player_y > 1){ //Up arrow movement and bound checking
 			player_y -= 1;
 		}
-		else if(c == 0x42 && player_y < 13){
+		else if(c == 0x42 && player_y < 13){ //Down arrow movement and bound checking
 			player_y += 1;
 		}
-		else if(c == 'q'){
+		else if(c == 'q'){ //Quitting the game
 			running = false;
 			break;
 		}
-		else if(c == 'n'){
+		else if(c == 'n'){ //Starting a new game
 			new_game();
 			cpu_score = 0;
 			player_score = 0;
 		}
-		else if(c == 'c' && (cpu_score < 5 && player_score < 5) && (cpu_score > 0 || player_score > 0)){
+		else if(c == 'c' && (cpu_score < 5 && player_score < 5) && (cpu_score > 0 || player_score > 0)){ //Continue to next match
 			new_game();
 		}
 
-		c = '\0';
+		c = '\0'; //Clears input so it doesn't spam once you let go of the key
 		show_map();
 	
 
-		if(frame_count % y_interval == 0){
-			if(ball_y + vel_y > 0 && ball_y + vel_y < 13){
+		//Ball movement and collision
+		if(frame_count % y_interval == 0){ //y axis movement
+			if(ball_y + vel_y > 0 && ball_y + vel_y < 13){ //Bound checking and y axis movement
 				ball_y += vel_y;
 			}
-			else{
+			else{ //y axis bounce logic
 				vel_y *= -1;
 				ball_y += vel_y;
 			}
 
+			//Makes the CPU paddle follow the ball as it changes y value based on its follow chance
 			int cpu_follow = rand_between(1, 100);
 			if(cpu_follow <= cpu_follow_chance && cpu_y + vel_y > 0 && cpu_y + vel_y < 13){
 				cpu_y += vel_y;
 			}
 		}
 
-		if (frame_count % x_interval == 0) {
-    			int next_x = ball_x + vel_x;
+		if (frame_count % x_interval == 0) { //x axis movement
+    		int next_x = ball_x + vel_x;
 
-			//paddle collision
+			//paddle collision, next_y not needed since y was already updated
 			if((next_x == player_x && ball_y == player_y) || (next_x == cpu_x && ball_y == cpu_y)){
 				vel_x *= -1;
 			}
@@ -312,10 +336,9 @@ int main(int argc, char *argv){
 				cpu_score++;
 			}
 
-			if(next_x <= 0 || next_x >= 42){
+			if(next_x <= 0 || next_x >= 42){ //Stops the ball and opens menu on score
 				vel_x = 0;
 				vel_y = 0;
-				system("clear");
 			}
 
 			ball_x += vel_x;
