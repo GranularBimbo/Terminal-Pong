@@ -92,25 +92,25 @@ void show_map(){
 	//Menu display between rounds
 	if(vel_x == 0 || vel_y == 0){
 		if(cpu_score == 5){
-			field[START_Y][17] = 'Y';
-			field[START_Y][18] = 'O';
-			field[START_Y][19] = 'U';
-			field[START_Y][20] = ' ';
-			field[START_Y][21] = 'L';
-			field[START_Y][22] = 'O';
-			field[START_Y][23] = 'S';
-			field[START_Y][24] = 'E';
-			field[START_Y][25] = '!';
+			field[START_Y-1][17] = 'Y';
+			field[START_Y-1][18] = 'O';
+			field[START_Y-1][19] = 'U';
+			field[START_Y-1][20] = ' ';
+			field[START_Y-1][21] = 'L';
+			field[START_Y-1][22] = 'O';
+			field[START_Y-1][23] = 'S';
+			field[START_Y-1][24] = 'E';
+			field[START_Y-1][25] = '!';
 		}
 		else if(player_score == 5){
-			field[START_Y][18] = 'Y';
-			field[START_Y][19] = 'O';
-			field[START_Y][20] = 'U';
-			field[START_Y][21] = ' ';
-			field[START_Y][22] = 'W';
-			field[START_Y][23] = 'I';
-			field[START_Y][24] = 'N';
-			field[START_Y][25] = '!';
+			field[START_Y-1][18] = 'Y';
+			field[START_Y-1][19] = 'O';
+			field[START_Y-1][20] = 'U';
+			field[START_Y-1][21] = ' ';
+			field[START_Y-1][22] = 'W';
+			field[START_Y-1][23] = 'I';
+			field[START_Y-1][24] = 'N';
+			field[START_Y-1][25] = '!';
 		}
 		
 		if((cpu_score < 5 && player_score < 5) && (cpu_score > 0 || player_score > 0)){
@@ -204,6 +204,17 @@ int rand_dir(){
 
 //Clears the menu options so the field is clear during a match
 void reset_message(){
+	field[START_Y-1][16] = ' ';
+	field[START_Y-1][17] = ' ';
+	field[START_Y-1][18] = ' ';
+	field[START_Y-1][19] = ' ';
+	field[START_Y-1][20] = ' ';
+	field[START_Y-1][21] = ' ';
+	field[START_Y-1][22] = ' ';
+	field[START_Y-1][23] = ' ';
+	field[START_Y-1][24] = ' ';
+	field[START_Y-1][25] = ' ';
+	
 	field[START_Y][16] = ' ';
 	field[START_Y][17] = ' ';
 	field[START_Y][18] = ' ';
