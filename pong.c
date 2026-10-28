@@ -240,8 +240,6 @@ void reset_message(){
 
 //Resets the paddles and ball and sends it moving in a random direction
 void new_game(){
-	system("clear");
-
 	reset_message();	
 
 	ball_x = START_X;
