@@ -12,6 +12,12 @@
 #define START_Y 6
 #define START_X 20
 
+#define START_Y_INTERVAL 5
+#define START_X_INTERVAL 2
+
+//Interval is essentially how many frames it takes for the ball position to update
+//Ex: y_interval of 5 means ball y only updates every 5 frames
+
 //Position variables
 int player_x = 40, player_y = START_Y;
 int cpu_x = 2, cpu_y = START_Y;
@@ -22,7 +28,7 @@ int player_score = 0, cpu_score = 0;
 int max_score = 5;
 
 //AI movement and difficulty variables
-int vel_x = 0, vel_y = 0, x_interval = 2, y_interval = 5; //Min interval of 1, higher interval = slower movement on that axis
+int vel_x = 0, vel_y = 0, x_interval = START_X_INTERVAL, y_interval = START_Y_INTERVAL; //Min interval of 1, higher interval = slower movement on that axis
 int cpu_follow_chance = 90; //Percentage based, higher follow chance % = more CPU accuracy.
 
 //90 seems deceptively high, but it's good for a couple back and forths. It's checked every time the ball changes height
@@ -260,6 +266,9 @@ void new_game(){
 	vel_x = rand_dir();
 	vel_y = rand_dir();
 
+	x_interval = START_X_INTERVAL;
+	y_interval = START_Y_INTERVAL; //This in particular makes the start of each round feel the same. If you comment this line out it might be more fun but idk 
+
 	cpu_y = START_Y;
 	player_y = START_Y;
 
@@ -334,9 +343,10 @@ int main(int argc, char *argv){
 		if (frame_count % x_interval == 0) { //x axis movement
     		int next_x = ball_x + vel_x;
 
-			//paddle collision, next_y not needed since y was already updated
+			//Paddle collision, next_y not needed since y was already updated
 			if((next_x == player_x && ball_y == player_y) || (next_x == cpu_x && ball_y == cpu_y)){
 				vel_x *= -1;
+				y_interval = rand_between(5, 8) //Adds some variance to the y speed on paddle bounce
 			}
 
 			if(next_x <= 0 && vel_x < 0){
