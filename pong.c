@@ -19,6 +19,7 @@ int ball_x = 4, ball_y = START_Y;
 
 //Scoring variables
 int player_score = 0, cpu_score = 0;
+int max_score = 5;
 
 //AI movement and difficulty variables
 int vel_x = 0, vel_y = 0, x_interval = 2, y_interval = 5;
@@ -84,14 +85,14 @@ char field[ROWS][COLS] = {
 
 void show_map(){
 	printf("          --Terminal Pong v1.0.0--\n");
-	printf("First to 5 wins!\n\n");
+	printf("First to %d wins!\n\n", max_score);
 
 	printf("Press ↑ to move up\n");
 	printf("Press ↓ to move down\n\n");
 
 	//Menu display between rounds
 	if(vel_x == 0 || vel_y == 0){
-		if(cpu_score == 5){
+		if(cpu_score == max_score){
 			field[START_Y-1][17] = 'Y';
 			field[START_Y-1][18] = 'O';
 			field[START_Y-1][19] = 'U';
@@ -102,7 +103,7 @@ void show_map(){
 			field[START_Y-1][24] = 'E';
 			field[START_Y-1][25] = '!';
 		}
-		else if(player_score == 5){
+		else if(player_score == max_score){
 			field[START_Y-1][18] = 'Y';
 			field[START_Y-1][19] = 'O';
 			field[START_Y-1][20] = 'U';
@@ -113,7 +114,7 @@ void show_map(){
 			field[START_Y-1][25] = '!';
 		}
 		
-		if((cpu_score < 5 && player_score < 5) && (cpu_score > 0 || player_score > 0)){
+		if((cpu_score < max_score && player_score < max_score) && (cpu_score > 0 || player_score > 0)){
 			field[START_Y][16] = '[';
 			field[START_Y][17] = 'N';
 			field[START_Y][18] = ']';
@@ -305,7 +306,7 @@ int main(int argc, char *argv){
 			cpu_score = 0;
 			player_score = 0;
 		}
-		else if(c == 'c' && (cpu_score < 5 && player_score < 5) && (cpu_score > 0 || player_score > 0)){ //Continue to next match
+		else if(c == 'c' && (cpu_score < max_score && player_score < max_score) && (cpu_score > 0 || player_score > 0)){ //Continue to next match
 			new_game();
 		}
 
