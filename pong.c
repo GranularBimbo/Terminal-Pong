@@ -22,7 +22,7 @@ int player_score = 0, cpu_score = 0;
 int max_score = 5;
 
 //AI movement and difficulty variables
-int vel_x = 0, vel_y = 0, x_interval = 2, y_interval = 5;
+int vel_x = 0, vel_y = 0, x_interval = 2, y_interval = 5; //Min interval of 1, higher interval = slower movement on that axis
 int cpu_follow_chance = 90; //Percentage based, higher follow chance % = more CPU accuracy.
 
 //90 seems deceptively high, but it's good for a couple back and forths. It's checked every time the ball changes height
